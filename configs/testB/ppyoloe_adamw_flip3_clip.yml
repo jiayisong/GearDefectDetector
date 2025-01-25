@@ -1,0 +1,127 @@
+_BASE_: [
+    '../runtime.yml',
+    '../ppyoloe/_base_/ppyoloe_plus_crn.yml',
+]
+snapshot_epoch: 5
+log_iter: 5
+use_ema: true
+ema_decay: 0.999
+ema_decay_type: normal
+epoch: 150
+pretrain_weights: https://bj.bcebos.com/v1/paddledet/models/pretrained/ppyoloe_crn_l_obj365_pretrained.pdparams
+depth_mult: 1.0
+width_mult: 1.0
+
+
+LearningRate:
+  base_lr: 0.00005
+  schedulers:
+    - !PiecewiseDecay
+      gamma: 0.1
+      milestones:
+        - 200
+    - !LinearWarmup
+      start_factor: 0.
+      epochs: 1
+
+OptimizerBuilder:
+  optimizer:
+    type: AdamW
+    beta1: 0.9
+    beta2: 0.999
+    weight_decay: 0.01
+
+
+worker_num: 8
+TrainReader:
+  sample_transforms:
+    - Decode: { }
+    - RandomDistort: { }
+    - ChiLunResize: { base_ratio: 0.65 }
+    - RandomSizeExpand: { size: 640, prob: 0.5, fill_value: [ 0,0,0 ] }
+    - RandomSizeCrop: { target_size: [ 1024,512 ], scale: 1.6, max_ratio: 1.1, fill_value: [ 0,0,0 ] }
+    - RandomFlipUpDownLeftRight: { prob: 0.5 }
+
+
+  batch_transforms:
+    - BatchRandomResize: {target_size: [1024,512],  keep_ratio: False, random_size: False, random_interp: True}
+    - NormalizeImage: { mean: [ 0., 0., 0. ], std: [ 1., 1., 1. ], norm_type: none }
+    - Permute: { }
+    - PadGT: { }
+  batch_size: 16
+  shuffle: true
+  drop_last: true
+  use_shared_memory: false
+  collate_batch: true
+
+EvalReader:
+  sample_transforms:
+    - Decode: { }
+    - ChiLunResize: { base_ratio: 1 }
+    - MultiRatioTestResize: { target_ratio: [ 0.65, ],  use_flip_updownleftright: True, interp: 2 }
+    - Pad: { size_divisor: 32, pad_mode: 0, fill_value: [ 0,0,0 ] }
+    - NormalizeImage: { mean: [ 0., 0., 0. ], std: [ 1., 1., 1. ], norm_type: none }
+    - Permute: { }
+  batch_size: 1
+
+TestReader:
+  sample_transforms:
+    - Decode: { }
+    - ChiLunResize: { base_ratio: 1 }
+    - MultiRatioTestResize: { target_ratio: [ 0.65, ],  use_flip_updownleftright: True, interp: 2 }
+    - Pad: { size_divisor: 32, pad_mode: 0, fill_value: [ 0,0,0 ] }
+    - NormalizeImage: { mean: [ 0., 0., 0. ], std: [ 1., 1., 1. ], norm_type: none }
+    - Permute: { }
+  batch_size: 1
+
+metric: COCO
+num_classes: 3
+classwise: True
+
+TrainDataset:
+  !COCODataSet
+  image_dir: /mnt/DataSets/齿轮检测数据集/trainval/JPEGImages
+  anno_path: /mnt/DataSets/齿轮检测数据集/trainval/train.json
+  dataset_dir: /mnt/DataSets/齿轮检测数据集/trainval
+  data_fields: [ 'image', 'gt_bbox', 'gt_class', 'is_crowd' ]
+  allow_empty: True
+
+
+
+EvalDataset:
+  !COCODataSet
+  image_dir: /mnt/DataSets/齿轮检测数据集/trainval/JPEGImages
+  anno_path: /mnt/DataSets/齿轮检测数据集/trainval/val.json
+  dataset_dir: /mnt/DataSets/齿轮检测数据集/trainval
+  allow_empty: True
+
+TestDataset:
+  !ImageFolder
+  image_dir: /mnt/DataSets/齿轮检测数据集/testA
+
+
+PPYOLOEHead:
+  fpn_strides: [ 32, 16, 8 ]
+  grid_cell_scale: 5.0
+  grid_cell_offset: 0.5
+  static_assigner_epoch: -1
+  num_classes: 3
+  use_varifocal_loss: True
+  loss_weight: { class: 1.0, iou: 2.5, dfl: 0.5 }
+  exclude_nms: False
+  area_range: [49, 10000000]
+  static_assigner:
+    name: ATSSAssigner
+    num_classes: 3
+    topk: 9
+  assigner:
+    name: TaskAlignedAssigner
+    topk: 13
+    alpha: 1.0
+    beta: 6.0
+  nms:
+    name: MultiClassNMS
+    nms_top_k: 3000
+    keep_top_k: 300
+    score_threshold: 0.0
+    nms_threshold: 0.55

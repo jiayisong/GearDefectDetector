@@ -1,0 +1,7 @@
+_BASE_: [
+    '../runtime.yml',
+    './ppyoloe_adamw_flip3_clip.yml',
+]
+pretrain_weights: https://bj.bcebos.com/v1/paddledet/models/pretrained/ppyoloe_crn_m_obj365_pretrained.pdparams
+depth_mult: 0.67
+width_mult: 0.75

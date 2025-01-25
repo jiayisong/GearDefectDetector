@@ -1,0 +1,7 @@
+_BASE_: [
+    '../runtime.yml',
+    './ppyoloe_adamw_flip3_clip2.yml',
+]
+pretrain_weights: output/ppyoloe_adamw_flip3_clip_m/best_model.pdparams
+depth_mult: 0.67
+width_mult: 0.75
