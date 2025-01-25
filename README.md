@@ -41,18 +41,11 @@ python -c "import paddle; print(paddle.__version__)"
 
 ### 2. 安装PaddleDetection
 
-
-
-
-**注意：** pip安装方式只支持Python3
-
-
-
 ```
+git clone https://github.com/jiayisong/GearDefectDetector.git
 # 安装其他依赖
-cd YYDS
+cd GearDefectDetector
 pip install -r requirements.txt
-
 # 编译安装paddledet
 python setup.py install
 ```
