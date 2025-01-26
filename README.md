@@ -1,7 +1,7 @@
 
-# 代码运行说明
+# 2022年兴智杯人工智能大赛国产开发框架工程化应用赛方案
 
-
+[比赛官网](http://1.203.115.183:81/#/trackDetail?id=24)给出了具体的比赛细则，我们智控所智能检测团队最终取得了[排行榜](http://www.aiinnovation.com.cn/#/aiaeDetail?id=558)的第二名。
 
 ## 环境要求
 
@@ -73,6 +73,7 @@ Ran 7 tests in 12.816s
 OK
 ```
 ## 数据准备
+[训练数据](http://www.aiinnovation.com.cn/#/aiaeDetail?id=558)由比赛方给出。
 ### 拆分数据集为训练集和验证集
 按照9:1的比例，划分训练集和验证集。
 使用飞桨全流程开发工具[PaddleX](https://gitee.com/paddlepaddle/PaddleX)提供的一键切分数据集解决方案。
@@ -89,6 +90,10 @@ python3 tools/train.py --config configs/testB/ppyoloe_adamw_flip3_clip_s.yml  --
 python3 tools/train.py --config configs/testB/ppyoloe_adamw_flip3_clip_x.yml  --use_vdl=True --vdl_log_dir=./testB/ppyoloe_adamw_flip3_clip_x/ --eval --amp
 ```
 本项目单模型默认均使用翻转增强，训练结果如下
+
+训练好的模型权重都在如下文件中：
+通过网盘分享的文件：output.zip
+链接: https://pan.baidu.com/s/1o1j047EmVm_Z1_ArxAarBQ?pwd=6h34 提取码: 6h34
 
 | 模型 |  配置文件        |  验证集mAP                |模型权重     |
 | :-------------: | :-------------: | :----------: | :------------: |
